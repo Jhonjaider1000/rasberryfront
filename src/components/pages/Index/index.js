@@ -33,6 +33,8 @@ export default () => {
       telefono: "",
       tipo: "",
       sintomas: "",
+      fecha_nacimiento: "",
+      rh: "",
     };
   };
   const [data, setData] = useState(getInitObj());
@@ -73,7 +75,7 @@ export default () => {
         type: SOCKET_MESSAGES.SET_GROUP,
         dispositivo: getDevice(),
       });
-    } else if (msg.type === SOCKET_MESSAGES.NEW_LAST_USER) {
+    } else if (msg.type === SOCKET_MESSAGES.NEW_LAST_USER) {      
       if (!msg.data) {
         return;
       }
@@ -157,173 +159,204 @@ export default () => {
     return "temp";
   };
 
-  return (
-    <ContentIndex>
-      <div className="container custom">
-        <Header>
-          <img
-            src={`${process.env.PUBLIC_URL}/img/covid-logo.svg`}
-            className="logo animate__animated animate__bounce"
-          />
-          <h1 className="title">COVID-19 - Analizer</h1>
-        </Header>
-        <Body>
-          <div className="row">
-            <div className="col-12 pb-3">
-              <Alert severity="info">
-                <AlertTitle>Información</AlertTitle>
-                Esta información solo será usada para efectos de cerco
-                epidemiológico por <strong>Covid-19</strong>.
-              </Alert>
-            </div>
-            <div className="col-md-4">
-              <TextField
-                label="Temperatura"
-                id="temperatura"
-                margin="normal"
-                name="temperatura"
-                value={data.temperatura}
-                fullWidth={true}
-                size="small"
-                onChange={onChange}
-                className={getClassTemperatura()}
-                variant="outlined"
-              />
-            </div>
-            <div className="col-md-8">
-              <TextField
-                label="Documento"
-                id="documento"
-                name="documento"
-                margin="normal"
-                fullWidth={true}
-                onChange={onChange}
-                size="small"
-                value={data.documento}
-                required
-                variant="outlined"
-              />
-            </div>
-            <div className="col-6">
-              <TextField
-                label="Nombres"
-                id="nombres"
-                name="nombres"
-                margin="normal"
-                fullWidth={true}
-                value={data.nombres}
-                size="small"
-                onChange={onChange}
-                required
-                variant="outlined"
-              />
-            </div>
-            <div className="col-6">
-              <TextField
-                label="Apellidos"
-                id="apellidos"
-                name="apellidos"
-                value={data.apellidos}
-                margin="normal"
-                fullWidth={true}
-                onChange={onChange}
-                size="small"
-                required
-                variant="outlined"
-              />
-            </div>
-            <div className="col-6">
-              <TextField
-                label="Teléfono"
-                id="telefono"
-                name="telefono"
-                value={data.telefono}
-                onChange={onChange}
-                margin="normal"
-                fullWidth={true}
-                size="small"
-                required
-                variant="outlined"
-              />
-            </div>
-            <div className="col-6">
-              <TextField
-                label="EPS"
-                id="eps"
-                name="eps"
-                value={data.eps}
-                margin="normal"
-                fullWidth={true}
-                onChange={onChange}
-                size="small"
-                required
-                variant="outlined"
-              />
-            </div>
-            <div className="col-6 pt-3">
-              <FormControl
-                variant="outlined"
-                name="tipo"
-                fullWidth={true}
-                size="small"
-                required
-              >
-                <InputLabel id="labelTipo">Tipo</InputLabel>
-                <Select
-                  labelId="labelTipo"
-                  id="tipo"
+  const render = () => {
+    return (
+      <ContentIndex>
+        <div className="container custom">
+          <Header>
+            <img
+              src={`${process.env.PUBLIC_URL}/img/covid-logo.svg`}
+              className="logo animate__animated animate__bounce"
+            />
+            <h1 className="title">COVID-19 - Analizer</h1>
+          </Header>
+          <Body>
+            <div className="row">
+              <div className="col-12 pb-3">
+                <Alert severity="info">
+                  <AlertTitle>Información</AlertTitle>
+                  Esta información solo será usada para efectos de cerco
+                  epidemiológico por <strong>Covid-19</strong>.
+                </Alert>
+              </div>
+              <div className="col-md-4">
+                <TextField
+                  label="Temperatura"
+                  id="temperatura"
+                  margin="normal"
+                  name="temperatura"
+                  value={data.temperatura}
+                  fullWidth={true}
+                  size="small"
+                  onChange={onChange}
+                  className={getClassTemperatura()}
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-md-8">
+                <TextField
+                  label="Documento"
+                  id="documento"
+                  name="documento"
+                  margin="normal"
+                  fullWidth={true}
+                  onChange={onChange}
+                  size="small"
+                  value={data.documento}
+                  required
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-6">
+                <TextField
+                  label="Nombres"
+                  id="nombres"
+                  name="nombres"
+                  margin="normal"
+                  fullWidth={true}
+                  value={data.nombres}
+                  size="small"
+                  onChange={onChange}
+                  required
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-6">
+                <TextField
+                  label="Apellidos"
+                  id="apellidos"
+                  name="apellidos"
+                  value={data.apellidos}
+                  margin="normal"
+                  fullWidth={true}
+                  onChange={onChange}
+                  size="small"
+                  required
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-6">
+                <TextField
+                  label="Teléfono"
+                  id="telefono"
+                  name="telefono"
+                  value={data.telefono}
+                  onChange={onChange}
+                  margin="normal"
+                  fullWidth={true}
+                  size="small"
+                  required
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-6">
+                <TextField
+                  label="EPS"
+                  id="eps"
+                  name="eps"
+                  value={data.eps}
+                  margin="normal"
+                  fullWidth={true}
+                  onChange={onChange}
+                  size="small"
+                  required
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-6 pt-3">
+                <FormControl
+                  variant="outlined"
                   name="tipo"
                   fullWidth={true}
                   size="small"
-                  onChange={onChange}
-                  value={data.tipo}
-                  label="Tipo"
+                  required
                 >
-                  <MenuItem value="">
-                    <em>Ninguno</em>
-                  </MenuItem>
-                  <MenuItem value={"E"}>Empleado</MenuItem>
-                  <MenuItem value={"V"}>Visitante</MenuItem>
-                </Select>
-              </FormControl>
-            </div>
-            <div className="col-6 pt-3">
-              <FormControl
-                variant="outlined"
-                fullWidth={true}
-                name="sintomas"
-                size="small"
-                required
-              >
-                <InputLabel id="labelSintomas">Síntomas</InputLabel>
-                <Select
-                  labelId="labelSintomas"
-                  id="sintomas"
+                  <InputLabel id="labelTipo">Tipo</InputLabel>
+                  <Select
+                    labelId="labelTipo"
+                    id="tipo"
+                    name="tipo"
+                    fullWidth={true}
+                    size="small"
+                    onChange={onChange}
+                    value={data.tipo}
+                    label="Tipo"
+                  >
+                    <MenuItem value="">
+                      <em>Ninguno</em>
+                    </MenuItem>
+                    <MenuItem value={"E"}>Empleado</MenuItem>
+                    <MenuItem value={"V"}>Visitante</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+              <div className="col-6 pt-3">
+                <FormControl
+                  variant="outlined"
+                  fullWidth={true}
                   name="sintomas"
+                  size="small"
+                  required
+                >
+                  <InputLabel id="labelSintomas">Síntomas</InputLabel>
+                  <Select
+                    labelId="labelSintomas"
+                    id="sintomas"
+                    name="sintomas"
+                    fullWidth={true}
+                    size="small"
+                    value={data.sintomas}
+                    onChange={onChange}
+                    label="Síntomas"
+                  >
+                    <MenuItem value="S">Con Síntomas</MenuItem>
+                    <MenuItem value="N">Sín Síntomas</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+              <div className="col-6">
+                <TextField
+                  label="Fecha Nacimiento"
+                  id="fecha_nacimiento"
+                  name="fecha_nacimiento"
+                  value={data.fecha_nacimiento}
+                  onChange={onChange}
+                  margin="normal"
                   fullWidth={true}
                   size="small"
-                  value={data.sintomas}
+                  required
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-6">
+                <TextField
+                  label="RH"
+                  id="rh"
+                  name="rh"
+                  value={data.rh}
                   onChange={onChange}
-                  label="Síntomas"
+                  margin="normal"
+                  fullWidth={true}
+                  size="small"
+                  required
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-12 pt-3 text-right">
+                <Button
+                  variant="contained"
+                  size="large"
+                  color="primary"
+                  onClick={enviarFormulario}
                 >
-                  <MenuItem value="S">Con Síntomas</MenuItem>
-                  <MenuItem value="N">Sín Síntomas</MenuItem>
-                </Select>
-              </FormControl>
+                  Enviar
+                </Button>
+              </div>
             </div>
-            <div className="col-12 pt-3 text-right">
-              <Button
-                variant="contained"
-                size="large"
-                color="primary"
-                onClick={enviarFormulario}
-              >
-                Enviar
-              </Button>
-            </div>
-          </div>
-        </Body>
-      </div>
-    </ContentIndex>
-  );
+          </Body>
+        </div>
+      </ContentIndex>
+    );
+  };
+  return render();
 };
