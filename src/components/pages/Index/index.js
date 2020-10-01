@@ -196,6 +196,7 @@ export default () => {
               sintomas: sintomas,
             });
             setData(getInitObj());
+            setTemperature(0);
           }
         });
     };
@@ -203,6 +204,8 @@ export default () => {
       .where("documento", "=", documento)
       .get()
       .then((response) => {
+        setData(getInitObj());
+        setTemperature(0);
         if (response.code <= 0) {
         } else {
         }
