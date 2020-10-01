@@ -1,6 +1,10 @@
 import styled from "styled-components";
 
 export const ContentIndex = styled.div`
+  .Mui-disabled.MuiInputBase-input {
+    background-color: #efefef;
+    color: #555555;
+  }
   display: flex;
   flex-wrap: wrap;
   width: 100%;
@@ -28,10 +32,6 @@ export const RightPanel = styled.div`
 
 export const Header = styled.div`
   background-color: #394fe4;
-  //background-image: url("/img/covid-bg.svg");
-  //background-repeat: repeat;
-  //background-position: 0;
-  //background-size: contain cover;
   width: 100%;
   min-height: 70px;
   display: flex;
@@ -51,6 +51,23 @@ export const Header = styled.div`
 export const Body = styled.div`
   display: block;
   padding: 15px 30px;
+
+  & .temperature-content.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    & .content-loader-temperature {
+      display: "flex";
+      justify-content: flex-start;
+      align-items: center;
+      & .label {
+        display: inline-flex;
+        transform: translateY(-6px);
+        margin-left: 15px;
+        font-weight: bold;
+      }
+    }
+  }
 
   & .temp {
     pointer-events: none;

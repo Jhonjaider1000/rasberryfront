@@ -10,6 +10,8 @@ import { Alert, AlertTitle } from "@material-ui/lab";
 import Deplyn from "../../../Consumer/DeplynConsumer";
 import configJSON from "../../../config.json";
 
+const develop = true;
+
 const SOCKET_MESSAGES = {
   FETCH: "FETCH",
   WELCOME: "WELCOME",
@@ -18,6 +20,7 @@ const SOCKET_MESSAGES = {
   NEW_LAST_USER: "NEW_LAST_USER",
   ADD_HISTORY: "ADD_HISTORY",
   ADD_USER: "ADD_USER",
+  GET_TEMPERATURE: "GET_TEMPERATURE",
 };
 
 export default () => {
@@ -25,7 +28,6 @@ export default () => {
 
   const getInitObj = () => {
     return {
-      temperatura: "0",
       documento: "",
       nombres: "",
       apellidos: "",
@@ -38,10 +40,73 @@ export default () => {
     };
   };
   const [data, setData] = useState(getInitObj());
+  const [temperature, setTemperature] = useState(0);
+  const [loadingTemperature, setLoadingTemperature] = useState(false);
+  const [capture, setCapture] = useState("");
 
   useEffect(() => {
     initApp();
+    startCaptureEvent();
   }, []);
+
+  const startCaptureEvent = () => {
+    const invalidNames = ["telefono", "eps", "tipo", "sintomas"];
+    document.querySelector("body").addEventListener("keyup", function (e) {
+      const control = e.target;
+      const { name } = control;
+      if (invalidNames.includes(name)) {
+        return;
+      }
+      setCapture(capture + e.key);
+      if (e.keyCode === 13 || e.which === 13) {
+        processCapture(capture);
+        setCapture("");
+      }
+    });
+  };
+
+  const getIndexData = (index, data = []) => {
+    if (data.length > index) {
+      return data[index];
+    }
+    return "Indefinido";
+  };
+
+  const processCapture = (capture) => {
+    const cap = develop
+      ? "0080124664TabShiftaShiftmShifteShiftzShiftqShiftuShiftiShifttShiftaTabShifttShiftoShiftvShiftaShiftrTabShiftjShiftuShiftaShiftnTabShiftcShiftaShiftrShiftlShiftoShiftsTabShiftmTab1981-10-15TabShifto+Enter"
+      : capture;
+    const data = cap.replace(/\Shift/g, "").split("Tab");
+    try {
+      const msg = {
+        type: SOCKET_MESSAGES.GET_TEMPERATURE,
+        data: {
+          documento: getIndexData(0, data),
+          nombres: `${getIndexData(3, data)} ${getIndexData(
+            4,
+            data
+          )}`.toUpperCase(),
+          apellidos: `${getIndexData(1, data)} ${getIndexData(2, data)}`,
+          eps: "",
+          telefono: "",
+          tipo: "",
+          sintomas: "",
+          fecha_nacimiento: getIndexData(6, data),
+          rh: getIndexData(7, data).replace("Enter", ""),
+        },
+      };
+      setLoadingTemperature(true);
+      socket.sendMessage(msg);
+      getUser(msg.data.documento).then((response) => {
+        console.log(response);
+        if (response.code > 0) {
+          setData({ ...msg.data, ...response.data[0] });
+        }
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   var getParams = function (url) {
     var params = {};
@@ -75,14 +140,12 @@ export default () => {
         type: SOCKET_MESSAGES.SET_GROUP,
         dispositivo: getDevice(),
       });
-    } else if (msg.type === SOCKET_MESSAGES.NEW_LAST_USER) {      
-      if (!msg.data) {
+    } else if (msg.type === SOCKET_MESSAGES.GET_TEMPERATURE) {
+      setLoadingTemperature(false);
+      if (!msg.temperature) {
         return;
       }
-      setData({
-        ...data,
-        ...msg.data,
-      });
+      setTemperature(msg.temperature);
     }
   };
 
@@ -94,6 +157,11 @@ export default () => {
     });
 
     socket.onMessage(onMessage);
+  };
+
+  const getUser = (documento) => {
+    const db = Deplyn.database();
+    return db.collection("user").where("documento", "=", documento).get();
   };
 
   const enviarFormulario = () => {
@@ -119,12 +187,14 @@ export default () => {
           telefono,
           eps,
           tipo,
+          sintomas,
         })
         .then((response) => {
           if (response.code > 0) {
-            db.collection("history")
-              .update(data.id)
-              .set({ sintomas: sintomas });
+            db.collection("history").add({
+              id_user: response[0].id,
+              sintomas: sintomas,
+            });
             setData(getInitObj());
           }
         });
@@ -134,26 +204,22 @@ export default () => {
       .get()
       .then((response) => {
         if (response.code <= 0) {
-          addUser();
         } else {
-          setData(getInitObj());
-          db.collection("history").update(data.id).set({ sintomas: sintomas });
-          setData(getInitObj());
         }
       })
       .catch(() => {
-        addUser();
+        // addUser();
       });
   };
 
   const getClassTemperatura = () => {
-    if (data.temperatura < 35) {
+    if (temperature <= 37) {
       return "success temp";
     }
-    if (data.temperatura >= 37) {
+    if (temperature >= 38) {
       return "danger temp";
     }
-    if (data.temperatura >= 35) {
+    if (temperature > 37) {
       return "warning temp";
     }
     return "temp";
@@ -179,19 +245,31 @@ export default () => {
                   epidemiológico por <strong>Covid-19</strong>.
                 </Alert>
               </div>
-              <div className="col-md-4">
-                <TextField
-                  label="Temperatura"
-                  id="temperatura"
-                  margin="normal"
-                  name="temperatura"
-                  value={data.temperatura}
-                  fullWidth={true}
-                  size="small"
-                  onChange={onChange}
-                  className={getClassTemperatura()}
-                  variant="outlined"
-                />
+              <div
+                className={`col-md-4 temperature-content ${
+                  loadingTemperature ? "active" : ""
+                }`}
+              >
+                {loadingTemperature ? (
+                  <div className="content-loader-temperature">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="sr-only">Loading...</span>
+                    </div>
+                    <span className="label">Leyendo...</span>
+                  </div>
+                ) : (
+                  <TextField
+                    label="Temperatura"
+                    id="temperatura"
+                    margin="normal"
+                    name="temperatura"
+                    value={temperature}
+                    fullWidth={true}
+                    size="small"
+                    className={getClassTemperatura()}
+                    variant="outlined"
+                  />
+                )}
               </div>
               <div className="col-md-8">
                 <TextField
@@ -204,6 +282,7 @@ export default () => {
                   size="small"
                   value={data.documento}
                   required
+                  disabled
                   variant="outlined"
                 />
               </div>
@@ -216,8 +295,8 @@ export default () => {
                   fullWidth={true}
                   value={data.nombres}
                   size="small"
+                  disabled
                   onChange={onChange}
-                  required
                   variant="outlined"
                 />
               </div>
@@ -226,12 +305,40 @@ export default () => {
                   label="Apellidos"
                   id="apellidos"
                   name="apellidos"
+                  disabled
                   value={data.apellidos}
                   margin="normal"
                   fullWidth={true}
                   onChange={onChange}
                   size="small"
-                  required
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-6">
+                <TextField
+                  label="Fecha Nacimiento"
+                  id="fecha_nacimiento"
+                  name="fecha_nacimiento"
+                  value={data.fecha_nacimiento}
+                  onChange={onChange}
+                  margin="normal"
+                  fullWidth={true}
+                  size="small"
+                  disabled
+                  variant="outlined"
+                />
+              </div>
+              <div className="col-6">
+                <TextField
+                  label="RH"
+                  id="rh"
+                  name="rh"
+                  value={data.rh}
+                  onChange={onChange}
+                  margin="normal"
+                  fullWidth={true}
+                  size="small"
+                  disabled
                   variant="outlined"
                 />
               </div>
@@ -244,8 +351,8 @@ export default () => {
                   onChange={onChange}
                   margin="normal"
                   fullWidth={true}
-                  size="small"
                   required
+                  size="small"
                   variant="outlined"
                 />
               </div>
@@ -314,35 +421,19 @@ export default () => {
                   </Select>
                 </FormControl>
               </div>
-              <div className="col-6">
-                <TextField
-                  label="Fecha Nacimiento"
-                  id="fecha_nacimiento"
-                  name="fecha_nacimiento"
-                  value={data.fecha_nacimiento}
-                  onChange={onChange}
-                  margin="normal"
-                  fullWidth={true}
-                  size="small"
-                  required
-                  variant="outlined"
-                />
-              </div>
-              <div className="col-6">
-                <TextField
-                  label="RH"
-                  id="rh"
-                  name="rh"
-                  value={data.rh}
-                  onChange={onChange}
-                  margin="normal"
-                  fullWidth={true}
-                  size="small"
-                  required
-                  variant="outlined"
-                />
-              </div>
               <div className="col-12 pt-3 text-right">
+                <Button
+                  variant="contained"
+                  size="large"
+                  color="default"
+                  className="mr-3"
+                  onClick={() => {
+                    setTemperature(0);
+                    setData(getInitObj());
+                  }}
+                >
+                  Limpiar
+                </Button>
                 <Button
                   variant="contained"
                   size="large"
