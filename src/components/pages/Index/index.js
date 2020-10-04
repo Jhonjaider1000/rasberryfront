@@ -12,6 +12,8 @@ import configJSON from "../../../config.json";
 import Delegate from "./Delegate";
 
 const develop = false;
+const DEVELOP_CAPTURE =
+  "0080124664TabShiftaShiftmShifteShiftzShiftqShiftuShiftiShifttShiftaTabShifttShiftoShiftvShiftaShiftrTabShiftjShiftuShiftaShiftnTabShiftcShiftaShiftrShiftlShiftoShiftsTabShiftmTab1981-10-15TabShifto+Enter";
 
 const SOCKET_MESSAGES = {
   FETCH: "FETCH",
@@ -88,9 +90,7 @@ export default () => {
   };
 
   const processCapture = (capture) => {
-    const cap = develop
-      ? "0080124664TabShiftaShiftmShifteShiftzShiftqShiftuShiftiShifttShiftaTabShifttShiftoShiftvShiftaShiftrTabShiftjShiftuShiftaShiftnTabShiftcShiftaShiftrShiftlShiftoShiftsTabShiftmTab1981-10-15TabShifto+Enter"
-      : capture;
+    const cap = develop ? DEVELOP_CAPTURE : capture;
     const data = cap.replace(/\Shift/g, "").split("Tab");
     try {
       const msg = {
