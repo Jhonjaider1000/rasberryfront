@@ -19,7 +19,8 @@
     "react-scripts": "3.4.3",
     "serialport": "^9.0.1",
     "socket.io-client": "^2.3.0",
-    "styled-components": "^5.2.0"
+    "styled-components": "^5.2.0",
+    "sweetalert2": "^10.3.5"
   },
   "scripts": {
     "start": "react-scripts start",

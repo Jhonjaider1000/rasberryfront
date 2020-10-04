@@ -9,8 +9,9 @@ import Button from "@material-ui/core/Button";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import Deplyn from "../../../Consumer/DeplynConsumer";
 import configJSON from "../../../config.json";
+import Delegate from "./Delegate";
 
-const develop = false;
+const develop = true;
 
 const SOCKET_MESSAGES = {
   FETCH: "FETCH",
@@ -23,8 +24,28 @@ const SOCKET_MESSAGES = {
   GET_TEMPERATURE: "GET_TEMPERATURE",
 };
 
+var getParams = function (url) {
+  var params = {};
+  var parser = document.createElement("a");
+  parser.href = url;
+  var query = parser.search.substring(1);
+  var vars = query.split("&");
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split("=");
+    params[pair[0]] = decodeURIComponent(pair[1]);
+  }
+  return params;
+};
+
+const getDevice = () => {
+  const params = getParams(window.location.href);
+  const device = params.device;
+  return device ? device : 1;
+};
+
 export default () => {
   const socket = Deplyn.socket();
+  let delegate = null;
 
   const getInitObj = () => {
     return {
@@ -41,6 +62,7 @@ export default () => {
   };
   const [data, setData] = useState(getInitObj());
   const [temperature, setTemperature] = useState(0);
+  const [listHealthEntities, setListHealthEntities] = useState([]);
   const [loadingTemperature, setLoadingTemperature] = useState(false);
   const [capture, setCapture] = useState("");
 
@@ -65,66 +87,46 @@ export default () => {
     });
   };
 
-  const getIndexData = (index, data = []) => {
-    if (data.length > index) {
-      return data[index];
-    }
-    return "Indefinido";
-  };
-
   const processCapture = (capture) => {
     const cap = develop
       ? "0080124664TabShiftaShiftmShifteShiftzShiftqShiftuShiftiShifttShiftaTabShifttShiftoShiftvShiftaShiftrTabShiftjShiftuShiftaShiftnTabShiftcShiftaShiftrShiftlShiftoShiftsTabShiftmTab1981-10-15TabShifto+Enter"
       : capture;
     const data = cap.replace(/\Shift/g, "").split("Tab");
+    console.log(data);
     try {
       const msg = {
         type: SOCKET_MESSAGES.GET_TEMPERATURE,
         data: {
-          documento: getIndexData(0, data),
-          nombres: `${getIndexData(3, data)} ${getIndexData(
+          documento: delegate.getIndexData(0, data),
+          nombres: `${delegate.getIndexData(3, data)} ${delegate.getIndexData(
             4,
             data
           )}`.toUpperCase(),
-          apellidos: `${getIndexData(1, data)} ${getIndexData(2, data)}`,
+          apellidos: `${delegate.getIndexData(1, data)} ${delegate.getIndexData(
+            2,
+            data
+          )}`,
           eps: "",
           telefono: "",
           tipo: "",
           sintomas: "",
-          fecha_nacimiento: getIndexData(6, data),
-          rh: getIndexData(7, data).replace("Enter", ""),
+          fecha_nacimiento: delegate.getIndexData(6, data),
+          rh: delegate.getIndexData(7, data).replace("Enter", ""),
         },
       };
       setLoadingTemperature(true);
       socket.sendMessage(msg);
-      getUser(msg.data.documento).then((response) => {
+      delegate.getUserByDocument(msg.data.documento).then((response) => {
         console.log(response);
         if (response.code > 0) {
           setData({ ...msg.data, ...response.data[0] });
+        } else {
+          setData({ ...data, ...msg.data });
         }
       });
     } catch (error) {
-      console.error(error);
+      console.error("Error al parcear el objeto:", error);
     }
-  };
-
-  var getParams = function (url) {
-    var params = {};
-    var parser = document.createElement("a");
-    parser.href = url;
-    var query = parser.search.substring(1);
-    var vars = query.split("&");
-    for (var i = 0; i < vars.length; i++) {
-      var pair = vars[i].split("=");
-      params[pair[0]] = decodeURIComponent(pair[1]);
-    }
-    return params;
-  };
-
-  const getDevice = () => {
-    const params = getParams(window.location.href);
-    const device = params.device;
-    return device ? device : 1;
   };
 
   const onChange = (event) => {
@@ -156,63 +158,22 @@ export default () => {
       prefix: "api",
     });
 
+    delegate = new Delegate(Deplyn.database());
+    delegate.getListHealthEntities().then((response) => {
+      console.log(response);
+      if (response.code > 0) {
+        setListHealthEntities(response.data);
+      }
+    });
     socket.onMessage(onMessage);
   };
 
-  const getUser = (documento) => {
-    const db = Deplyn.database();
-    return db.collection("user").where("documento", "=", documento).get();
-  };
-
   const enviarFormulario = () => {
-    const db = Deplyn.database();
-    const {
-      temperatura,
-      documento,
-      nombres,
-      apellidos,
-      eps,
-      telefono,
-      tipo,
-      sintomas,
-    } = data;
-
-    const addUser = () => {
-      db.collection("user")
-        .add({
-          temperatura,
-          documento,
-          nombres,
-          apellidos,
-          telefono,
-          eps,
-          tipo,
-          sintomas,
-        })
-        .then((response) => {
-          if (response.code > 0) {
-            db.collection("history").add({
-              id_user: response[0].id,
-              sintomas: sintomas,
-            });
-            setData(getInitObj());
-            setTemperature(0);
-          }
-        });
-    };
-    db.collection("user")
-      .where("documento", "=", documento)
-      .get()
-      .then((response) => {
-        setData(getInitObj());
-        setTemperature(0);
-        if (response.code <= 0) {
-        } else {
-        }
-      })
-      .catch(() => {
-        // addUser();
-      });
+    delegate = new Delegate(Deplyn.database());
+    delegate.sendForm(data, temperature, getDevice(), () => {
+      setData(getInitObj());
+      setTemperature(0);
+    });
   };
 
   const getClassTemperatura = () => {
@@ -359,19 +320,32 @@ export default () => {
                   variant="outlined"
                 />
               </div>
-              <div className="col-6">
-                <TextField
-                  label="EPS"
-                  id="eps"
-                  name="eps"
-                  value={data.eps}
-                  margin="normal"
+              <div className="col-6 pt-3">
+                <FormControl
+                  variant="outlined"
                   fullWidth={true}
-                  onChange={onChange}
+                  name="eps"
                   size="small"
                   required
-                  variant="outlined"
-                />
+                >
+                  <InputLabel id="labelEps">Eps</InputLabel>
+                  <Select
+                    labelId="labelEps"
+                    id="eps"
+                    name="eps"
+                    fullWidth={true}
+                    size="small"
+                    value={data.eps}
+                    onChange={onChange}
+                    label="Eps"
+                  >
+                    {listHealthEntities.map((entitie) => (
+                      <MenuItem key={entitie.id} value={entitie.nit}>
+                        {entitie.comercial_name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </div>
               <div className="col-6 pt-3">
                 <FormControl

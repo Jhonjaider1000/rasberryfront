@@ -1,4 +1,4 @@
 {
-    "apiurl":"http://vmi304306.contaboserver.net:82",
+    "apiurl":"http://localhost:82",
     "socketurl": "http://localhost:4000"
 }
