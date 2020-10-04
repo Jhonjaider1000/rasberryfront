@@ -11,7 +11,7 @@ import Deplyn from "../../../Consumer/DeplynConsumer";
 import configJSON from "../../../config.json";
 import Delegate from "./Delegate";
 
-const develop = true;
+const develop = false;
 
 const SOCKET_MESSAGES = {
   FETCH: "FETCH",
@@ -92,7 +92,6 @@ export default () => {
       ? "0080124664TabShiftaShiftmShifteShiftzShiftqShiftuShiftiShifttShiftaTabShifttShiftoShiftvShiftaShiftrTabShiftjShiftuShiftaShiftnTabShiftcShiftaShiftrShiftlShiftoShiftsTabShiftmTab1981-10-15TabShifto+Enter"
       : capture;
     const data = cap.replace(/\Shift/g, "").split("Tab");
-    console.log(data);
     try {
       const msg = {
         type: SOCKET_MESSAGES.GET_TEMPERATURE,
@@ -117,7 +116,6 @@ export default () => {
       setLoadingTemperature(true);
       socket.sendMessage(msg);
       delegate.getUserByDocument(msg.data.documento).then((response) => {
-        console.log(response);
         if (response.code > 0) {
           setData({ ...msg.data, ...response.data[0] });
         } else {
@@ -136,7 +134,6 @@ export default () => {
   };
 
   const onMessage = (msg) => {
-    console.log(msg);
     if (msg.type === SOCKET_MESSAGES.WELCOME) {
       socket.sendMessage({
         type: SOCKET_MESSAGES.SET_GROUP,
@@ -160,7 +157,6 @@ export default () => {
 
     delegate = new Delegate(Deplyn.database());
     delegate.getListHealthEntities().then((response) => {
-      console.log(response);
       if (response.code > 0) {
         setListHealthEntities(response.data);
       }
