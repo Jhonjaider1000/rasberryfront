@@ -10,7 +10,7 @@ import { Alert, AlertTitle } from "@material-ui/lab";
 import Deplyn from "../../../Consumer/DeplynConsumer";
 import configJSON from "../../../config.json";
 
-const develop = true;
+const develop = false;
 
 const SOCKET_MESSAGES = {
   FETCH: "FETCH",
