@@ -85,7 +85,6 @@ class Delegate {
 
     //Buscamos el usuario primero...
     this.getUserByDocument(documento).then(async (response) => {
-      console.log(response);
       let user = null;
       if (response.code > 0) {
         user = await this.updateUser(response.data[0].id, data);
@@ -165,13 +164,12 @@ class Delegate {
   };
 
   addHistory = (user, sintomas, device, temperature) => {
-    console.log(user, sintomas, device, temperature);
     return this.db.collection("history").add({
       id_user: user.id,
       documento: user.documento,
       temperatura: temperature,
       sintomas: sintomas,
-      device: device,
+      dispositivo: device,
     });
   };
 }
