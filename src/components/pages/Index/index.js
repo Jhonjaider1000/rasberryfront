@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Body, ContentIndex, Header } from "./styles";
 import TextField from "@material-ui/core/TextField";
 import Select from "@material-ui/core/Select";
@@ -48,6 +48,7 @@ const getDevice = () => {
 export default () => {
   const socket = Deplyn.socket();
   let delegate = null;
+  let capture = useRef("");
 
   const getInitObj = () => {
     return {
@@ -66,7 +67,10 @@ export default () => {
   const [temperature, setTemperature] = useState(0);
   const [listHealthEntities, setListHealthEntities] = useState([]);
   const [loadingTemperature, setLoadingTemperature] = useState(false);
-  const [capture, setCapture] = useState("");
+
+  const setCapture = (cap) => {
+    capture = cap;
+  };
 
   useEffect(() => {
     initApp();
@@ -81,6 +85,7 @@ export default () => {
       if (invalidNames.includes(name)) {
         return;
       }
+      console.log(capture);
       setCapture(capture + e.key);
       if (e.keyCode === 13 || e.which === 13) {
         processCapture(capture);
@@ -90,7 +95,9 @@ export default () => {
   };
 
   const processCapture = (capture) => {
-    const cap = develop ? DEVELOP_CAPTURE : capture;
+    const cap = develop
+      ? DEVELOP_CAPTURE
+      : capture.replace("[object Object]", "");
     const data = cap.replace(/\Shift/g, "").split("Tab");
     try {
       const msg = {
