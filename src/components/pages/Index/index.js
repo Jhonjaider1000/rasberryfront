@@ -210,7 +210,7 @@ export default () => {
     socket.onMessage(onMessage);
   };
 
-  const enviarFormulario = () => {    
+  const enviarFormulario = () => {
     setLoading(true);
     delegate = new Delegate(Deplyn.database());
     delegate.sendForm(
@@ -472,6 +472,7 @@ export default () => {
                       className="mr-3"
                       onClick={() => {
                         setTemperature(0);
+                        setLoadingTemperature(false);
                         setData(getInitObj());
                       }}
                     >
