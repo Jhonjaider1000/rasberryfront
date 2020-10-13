@@ -1,16 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Body, ContentIndex, Header } from "./styles";
+import { Body, ContentIndex, Header, KeyBoard } from "./styles";
 import TextField from "@material-ui/core/TextField";
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import Dialog from "@material-ui/core/Dialog";
 import Button from "@material-ui/core/Button";
 import { Alert, AlertTitle } from "@material-ui/lab";
 import Deplyn from "../../../Consumer/DeplynConsumer";
 import configJSON from "../../../config.json";
 import Delegate from "./Delegate";
 import moment from "moment";
+import BackspaceIcon from "@material-ui/icons/Backspace";
+import DoneOutlineOutlinedIcon from "@material-ui/icons/DoneOutlineOutlined";
 
 const develop = false;
 const DEVELOP_CAPTURE =
@@ -67,6 +70,7 @@ export default () => {
   };
   const [data, setData] = useState(getInitObj());
   const [loading, setLoading] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   const [temperature, setTemperature] = useState(0);
   const [listHealthEntities, setListHealthEntities] = useState([]);
   const [loadingTemperature, setLoadingTemperature] = useState(false);
@@ -241,9 +245,159 @@ export default () => {
     return "temp";
   };
 
+  const keyboardAction = (num) => {
+    if(data.telefono.length > 20){
+      return;
+    }
+    if (num == "A") {
+      setOpenDialog(false);
+      return;
+    }
+    if (num == "C") {
+      setData({ ...data, telefono: "" });
+      return;
+    }
+    setData({ ...data, telefono: data.telefono + num });
+  };
+
   const render = () => {
     return (
       <ContentIndex>
+        <Dialog onClose={() => setOpenDialog(false)} open={openDialog}>
+          <KeyBoard>
+            <div className="display">{data.telefono}</div>
+            <div className="keys-buttons">
+              <div className="keys-row">
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(7)}
+                  >
+                    7
+                  </Button>
+                </div>
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(8)}
+                  >
+                    8
+                  </Button>
+                </div>
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(9)}
+                  >
+                    9
+                  </Button>
+                </div>
+              </div>
+              <div className="keys-row">
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(4)}
+                  >
+                    4
+                  </Button>
+                </div>
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(5)}
+                  >
+                    5
+                  </Button>
+                </div>
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(6)}
+                  >
+                    6
+                  </Button>
+                </div>
+              </div>
+              <div className="keys-row">
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(1)}
+                  >
+                    1
+                  </Button>
+                </div>
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(2)}
+                  >
+                    2
+                  </Button>
+                </div>
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(3)}
+                  >
+                    3
+                  </Button>
+                </div>
+              </div>
+              <div className="keys-row">
+                <div className="key-col">
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="default"
+                    onClick={() => keyboardAction(0)}
+                  >
+                    0
+                  </Button>
+                </div>
+                <div className="key-col">
+                  <Button
+                    className="btn-action default"
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => keyboardAction("C")}
+                  >
+                    <BackspaceIcon />
+                  </Button>
+                </div>
+                <div className="key-col">
+                  <Button
+                    className="btn-action default"
+                    variant="contained"
+                    color="primary"
+                    onClick={() => keyboardAction("A")}
+                  >
+                    <DoneOutlineOutlinedIcon />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </KeyBoard>
+        </Dialog>
         <div className="container custom">
           <Header>
             <img
@@ -359,19 +513,29 @@ export default () => {
                 />
               </div>
               <div className="col-6">
-                <TextField
-                  label="Teléfono"
-                  id="telefono"
-                  name="telefono"
-                  value={data.telefono}
-                  onChange={onChange}
-                  margin="normal"
-                  fullWidth={true}
-                  required
-                  size="small"
-                  disabled={loading}
-                  variant="outlined"
-                />
+                <div className="phone-group">
+                  <TextField
+                    label="Teléfono"
+                    id="telefono"
+                    name="telefono"
+                    value={data.telefono}
+                    onChange={onChange}
+                    margin="normal"
+                    fullWidth={true}
+                    required
+                    size="small"
+                    disabled={true}
+                    variant="outlined"
+                  />
+                  <Button
+                    className="btn-action"
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setOpenDialog(true)}
+                  >
+                    #
+                  </Button>
+                </div>
               </div>
               <div className="col-6 pt-3">
                 <FormControl

@@ -1,5 +1,45 @@
 import styled from "styled-components";
 
+export const KeyBoard = styled.div`
+  display: block;
+  width: 300px;
+  padding: 15px;
+  & .display {
+    display: flex;
+    margin: 0 auto;
+    background-color: #efefef;
+    border: 1px solid rgba(0, 0, 0, 0.26);
+    height: 50px;
+    font-size: 1.5em;
+    color: #000000;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    margin-bottom: 5px;
+  }
+  & .keys-row {
+    display: flex;
+    & .key-col {
+      width: calc(100% / 3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      & .btn-action {
+        width: 100px;
+        height: 80px;
+        font-size: 2em;
+        margin: 5px;
+        outline: none;
+        border-radius: 8px;
+        &:not(.default) {
+          background-color: #3e3e3e;
+          color: #ffffff;
+        }
+      }
+    }
+  }
+`;
+
 export const ContentIndex = styled.div`
   .Mui-disabled.MuiInputBase-input {
     background-color: #efefef;
@@ -52,15 +92,25 @@ export const Body = styled.div`
   display: block;
   padding: 15px 30px;
 
-  & .content-loader-send{
+  & .content-loader-send {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    & .label{
+    & .label {
       font-weight: bold;
       margin-left: 5px;
     }
-  };
+  }
+
+  & .phone-group {
+    position: relative;
+    & .btn-action {
+      position: absolute;
+      top: 16px;
+      right: 0px;
+      height: 40px;
+    }
+  }
 
   & .temperature-content.active {
     display: flex;
