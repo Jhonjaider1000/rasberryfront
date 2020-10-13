@@ -246,15 +246,15 @@ export default () => {
   };
 
   const keyboardAction = (num) => {
-    if(data.telefono.length > 20){
-      return;
-    }
     if (num == "A") {
       setOpenDialog(false);
       return;
     }
     if (num == "C") {
       setData({ ...data, telefono: "" });
+      return;
+    }
+    if (data.telefono.length > 18) {
       return;
     }
     setData({ ...data, telefono: data.telefono + num });
