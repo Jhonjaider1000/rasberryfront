@@ -10,10 +10,11 @@ import { Alert, AlertTitle } from "@material-ui/lab";
 import Deplyn from "../../../Consumer/DeplynConsumer";
 import configJSON from "../../../config.json";
 import Delegate from "./Delegate";
+import moment from "moment";
 
 const develop = false;
 const DEVELOP_CAPTURE =
-  "0080124664TabShiftaShiftmShifteShiftzShiftqShiftuShiftiShifttShiftaTabShifttShiftoShiftvShiftaShiftrTabShiftjShiftuShiftaShiftnTabShiftcShiftaShiftrShiftlShiftoShiftsTabShiftmTab1981-10-15TabShifto+Enter";
+  "0080124664TabShiftaShiftmShifteShiftzShiftqShiftuShiftiShifttShiftaTabShiftjShiftuShiftaShiftnTabShiftcShiftaShiftrShiftlShiftoShiftsTabShiftmTab1981-10-15TabShifto+";
 
 const SOCKET_MESSAGES = {
   FETCH: "FETCH",
@@ -49,6 +50,7 @@ export default () => {
   const socket = Deplyn.socket();
   let delegate = null;
   let capture = useRef("");
+  let interval = useRef(null);
 
   const getInitObj = () => {
     return {
@@ -79,19 +81,69 @@ export default () => {
 
   const startCaptureEvent = () => {
     const invalidNames = ["telefono", "eps", "tipo", "sintomas"];
-    document.querySelector("body").addEventListener("keyup", function (e) {
+    document.querySelector("body").addEventListener("keydown", function (e) {
+      const textInput = e.key || String.fromCharCode(e.keyCode);
       const control = e.target;
       const { name } = control;
-      if (invalidNames.includes(name)) {
+      if (interval.current) {
+        clearTimeout(interval.current);
+      }
+      if (invalidNames.includes(name) && interval.current == null) {
         return;
       }
-      console.log(capture);
-      setCapture(capture + e.key);
+      interval.current = setTimeout(() => {
+        clearInterval(interval.current);
+        interval.current = null;
+      }, 200);
+      e.preventDefault();
+      setCapture(capture + textInput);
       if (e.keyCode === 13 || e.which === 13) {
         processCapture(capture);
         setCapture("");
       }
     });
+  };
+
+  const getObjCapture = (data = []) => {
+    const obj = {};
+    //Buscamos el indice inicial es decir el genéro.
+    const initIndex = data.findIndex(
+      (d) => `${d}`.toUpperCase() === "M" || `${d}`.toUpperCase() == "F"
+    );
+    obj.documento = delegate.getIndexData(0, data);
+    if (initIndex >= 0) {
+      //Solo un nombre y un apellido.
+      if (initIndex == 3) {
+        obj.nombres = delegate.getIndexData(2, data);
+        obj.apellidos = delegate.getIndexData(1, data);
+        obj.fecha_nacimiento = delegate.getIndexData(4, data);
+        obj.rh = delegate.getIndexData(5, data);
+      } else if (initIndex == 4) {
+        obj.nombres = `${delegate.getIndexData(
+          2,
+          data
+        )} ${delegate.getIndexData(3, data)}`;
+        obj.apellidos = `${delegate.getIndexData(1, data)}`;
+        obj.fecha_nacimiento = delegate.getIndexData(5, data);
+        obj.rh = delegate.getIndexData(6, data);
+      } else if (initIndex == 5) {
+        obj.nombres = `${delegate.getIndexData(
+          3,
+          data
+        )} ${delegate.getIndexData(4, data)}`;
+        obj.apellidos = `${delegate.getIndexData(
+          1,
+          data
+        )} ${delegate.getIndexData(2, data)}`;
+        obj.fecha_nacimiento = delegate.getIndexData(6, data);
+        obj.rh = delegate.getIndexData(7, data).replace("Enter", "");
+      }
+    }
+    obj.eps = "";
+    obj.telefono = "";
+    obj.tipo = "";
+    obj.sintomas = "";
+    return obj;
   };
 
   const processCapture = (capture) => {
@@ -102,29 +154,15 @@ export default () => {
     try {
       const msg = {
         type: SOCKET_MESSAGES.GET_TEMPERATURE,
-        data: {
-          documento: delegate.getIndexData(0, data),
-          nombres: `${delegate.getIndexData(3, data)} ${delegate.getIndexData(
-            4,
-            data
-          )}`.toUpperCase(),
-          apellidos: `${delegate.getIndexData(1, data)} ${delegate.getIndexData(
-            2,
-            data
-          )}`,
-          eps: "",
-          telefono: "",
-          tipo: "",
-          sintomas: "",
-          fecha_nacimiento: delegate.getIndexData(6, data),
-          rh: delegate.getIndexData(7, data).replace("Enter", ""),
-        },
+        data: getObjCapture(data),
       };
       setLoadingTemperature(true);
       socket.sendMessage(msg);
       delegate.getUserByDocument(msg.data.documento).then((response) => {
         if (response.code > 0) {
-          setData({ ...msg.data, ...response.data[0] });
+          const d = response.data[0];
+          d.fecha_nacimiento = moment(d.fecha_nacimiento).format('YYYY-MM-DD');
+          setData({ ...msg.data, ...d });
         } else {
           setData({ ...data, ...msg.data });
         }

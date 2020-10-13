@@ -165,7 +165,6 @@ class Delegate {
 
   addHistory = (user, sintomas, device, temperature) => {
     return this.db.collection("history").add({
-      id_user: user.id,
       documento: user.documento,
       temperatura: temperature,
       sintomas: sintomas,
