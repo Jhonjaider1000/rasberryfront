@@ -66,6 +66,7 @@ export default () => {
     };
   };
   const [data, setData] = useState(getInitObj());
+  const [loading, setLoading] = useState(false);
   const [temperature, setTemperature] = useState(0);
   const [listHealthEntities, setListHealthEntities] = useState([]);
   const [loadingTemperature, setLoadingTemperature] = useState(false);
@@ -161,7 +162,7 @@ export default () => {
       delegate.getUserByDocument(msg.data.documento).then((response) => {
         if (response.code > 0) {
           const d = response.data[0];
-          d.fecha_nacimiento = moment(d.fecha_nacimiento).format('YYYY-MM-DD');
+          d.fecha_nacimiento = moment(d.fecha_nacimiento).format("YYYY-MM-DD");
           setData({ ...msg.data, ...d });
         } else {
           setData({ ...data, ...msg.data });
@@ -209,12 +210,22 @@ export default () => {
     socket.onMessage(onMessage);
   };
 
-  const enviarFormulario = () => {
+  const enviarFormulario = () => {    
+    setLoading(true);
     delegate = new Delegate(Deplyn.database());
-    delegate.sendForm(data, temperature, getDevice(), () => {
-      setData(getInitObj());
-      setTemperature(0);
-    });
+    delegate.sendForm(
+      data,
+      temperature,
+      getDevice(),
+      () => {
+        setData(getInitObj());
+        setTemperature(0);
+        setLoading(false);
+      },
+      () => {
+        setLoading(false);
+      }
+    );
   };
 
   const getClassTemperatura = () => {
@@ -358,6 +369,7 @@ export default () => {
                   fullWidth={true}
                   required
                   size="small"
+                  disabled={loading}
                   variant="outlined"
                 />
               </div>
@@ -377,6 +389,7 @@ export default () => {
                     fullWidth={true}
                     size="small"
                     value={data.eps}
+                    disabled={loading}
                     onChange={onChange}
                     label="Eps"
                   >
@@ -394,6 +407,7 @@ export default () => {
                   name="tipo"
                   fullWidth={true}
                   size="small"
+                  disabled={loading}
                   required
                 >
                   <InputLabel id="labelTipo">Tipo</InputLabel>
@@ -421,6 +435,7 @@ export default () => {
                   fullWidth={true}
                   name="sintomas"
                   size="small"
+                  disabled={loading}
                   required
                 >
                   <InputLabel id="labelSintomas">Síntomas</InputLabel>
@@ -440,26 +455,38 @@ export default () => {
                 </FormControl>
               </div>
               <div className="col-12 pt-3 text-right">
-                <Button
-                  variant="contained"
-                  size="large"
-                  color="default"
-                  className="mr-3"
-                  onClick={() => {
-                    setTemperature(0);
-                    setData(getInitObj());
-                  }}
-                >
-                  Limpiar
-                </Button>
-                <Button
-                  variant="contained"
-                  size="large"
-                  color="primary"
-                  onClick={enviarFormulario}
-                >
-                  Enviar
-                </Button>
+                {loading && (
+                  <div className="content-loader-send">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="sr-only"> Enviando...</span>
+                    </div>
+                    <span className="label"> Enviando...</span>
+                  </div>
+                )}
+                {!loading && (
+                  <>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      color="default"
+                      className="mr-3"
+                      onClick={() => {
+                        setTemperature(0);
+                        setData(getInitObj());
+                      }}
+                    >
+                      Limpiar
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      color="primary"
+                      onClick={enviarFormulario}
+                    >
+                      Enviar
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </Body>

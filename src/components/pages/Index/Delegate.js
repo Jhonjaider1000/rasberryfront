@@ -45,8 +45,15 @@ class Delegate {
     return "Indefinido";
   };
 
-  validForm = (data) => {
+  validForm = (data, temperature) => {
     const { documento, telefono, eps, tipo, sintomas } = data;
+    if (temperature == 0) {
+      return {
+        res: false,
+        message: "Por favor realice de nuevo la lectura de la temperatura.",
+        title: "Temperatura no leida.",
+      };
+    }
     if (typeof telefono !== "string" || telefono.trim() == "") {
       return { res: false, message: "Por favor ingrese su teléfono." };
     }
@@ -75,14 +82,18 @@ class Delegate {
     return { res: true };
   };
 
-  sendForm = (data, temperature, device, callback) => {
-    const res = this.validForm(data);
+  sendForm = (data, temperature, device, callback, final) => {
+    const res = this.validForm(data, temperature);
     if (!res.res) {
-      Swal.fire("Complete el formulario", res.message, "error");
+      Swal.fire(
+        res.title ? res.title : "Complete el formulario",
+        res.message,
+        "error"
+      );
+      final();
       return;
     }
     const { documento, sintomas } = data;
-
     //Buscamos el usuario primero...
     this.getUserByDocument(documento).then(async (response) => {
       let user = null;
@@ -117,6 +128,7 @@ class Delegate {
             showConfirmButton: false,
             timer: 2000,
           });
+          final();
         } else {
           Swal.fire({
             position: "center",
@@ -125,6 +137,7 @@ class Delegate {
             showConfirmButton: false,
             timer: 2000,
           });
+          final();
         }
       } else {
         Swal.fire(
@@ -132,6 +145,7 @@ class Delegate {
           "Lo sentimos, no pudimos enviar la información.",
           "error"
         );
+        final();
       }
 
       typeof callback === "function" && callback(user);

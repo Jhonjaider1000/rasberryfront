@@ -52,6 +52,16 @@ export const Body = styled.div`
   display: block;
   padding: 15px 30px;
 
+  & .content-loader-send{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    & .label{
+      font-weight: bold;
+      margin-left: 5px;
+    }
+  };
+
   & .temperature-content.active {
     display: flex;
     justify-content: center;
