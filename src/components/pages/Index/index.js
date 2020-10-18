@@ -15,7 +15,6 @@ import moment from "moment";
 import BackspaceIcon from "@material-ui/icons/Backspace";
 import DoneOutlineOutlinedIcon from "@material-ui/icons/DoneOutlineOutlined";
 
-const develop = false;
 const DEVELOP_CAPTURE =
   "0080124664TabShiftaShiftmShifteShiftzShiftqShiftuShiftiShifttShiftaTabShiftjShiftuShiftaShiftnTabShiftcShiftaShiftrShiftlShiftoShiftsTabShiftmTab1981-10-15TabShifto+";
 
@@ -69,6 +68,7 @@ export default () => {
     };
   };
   const [data, setData] = useState(getInitObj());
+  const [develop, setDevelop] = useState(false);
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [temperature, setTemperature] = useState(0);
@@ -248,6 +248,9 @@ export default () => {
   const keyboardAction = (num) => {
     if (num == "A") {
       setOpenDialog(false);
+      if (data.telefono === "7890") {
+        setDevelop(!develop);
+      }
       return;
     }
     if (num == "C") {
