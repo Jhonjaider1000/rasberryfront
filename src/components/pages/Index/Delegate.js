@@ -17,8 +17,8 @@ class Delegate {
       apellidos,
       eps,
       telefono,
-      rh,
-      fecha_nacimiento,
+      // rh,
+      // fecha_nacimiento,
       tipo,
     } = data;
     return this.db.collection("user").add({
@@ -27,8 +27,8 @@ class Delegate {
       nombres,
       apellidos,
       eps,
-      rh,
-      fecha_nacimiento,
+      // rh,
+      // fecha_nacimiento,
       telefono,
       tipo,
     });
@@ -160,8 +160,8 @@ class Delegate {
       apellidos,
       eps,
       telefono,
-      rh,
-      fecha_nacimiento,
+      // rh,
+      // fecha_nacimiento,
       tipo,
     } = data;
     return this.db.collection("user").update(id).set({
@@ -171,8 +171,8 @@ class Delegate {
       apellidos,
       eps,
       telefono,
-      rh,
-      fecha_nacimiento,
+      // rh,
+      // fecha_nacimiento,
       tipo,
     });
   };

@@ -121,16 +121,16 @@ export default () => {
       if (initIndex == 3) {
         obj.nombres = delegate.getIndexData(2, data);
         obj.apellidos = delegate.getIndexData(1, data);
-        obj.fecha_nacimiento = delegate.getIndexData(4, data);
-        obj.rh = delegate.getIndexData(5, data);
+        // obj.fecha_nacimiento = delegate.getIndexData(4, data);
+        // obj.rh = delegate.getIndexData(5, data);
       } else if (initIndex == 4) {
         obj.nombres = `${delegate.getIndexData(
           2,
           data
         )} ${delegate.getIndexData(3, data)}`;
         obj.apellidos = `${delegate.getIndexData(1, data)}`;
-        obj.fecha_nacimiento = delegate.getIndexData(5, data);
-        obj.rh = delegate.getIndexData(6, data);
+        // obj.fecha_nacimiento = delegate.getIndexData(5, data);
+        // obj.rh = delegate.getIndexData(6, data);
       } else if (initIndex == 5) {
         obj.nombres = `${delegate.getIndexData(
           3,
@@ -140,8 +140,8 @@ export default () => {
           1,
           data
         )} ${delegate.getIndexData(2, data)}`;
-        obj.fecha_nacimiento = delegate.getIndexData(6, data);
-        obj.rh = delegate.getIndexData(7, data).replace("Enter", "");
+        // obj.fecha_nacimiento = delegate.getIndexData(6, data);
+        // obj.rh = delegate.getIndexData(7, data).replace("Enter", "");
       }
     }
     obj.eps = "";
@@ -166,7 +166,7 @@ export default () => {
       delegate.getUserByDocument(msg.data.documento).then((response) => {
         if (response.code > 0) {
           const d = response.data[0];
-          d.fecha_nacimiento = moment(d.fecha_nacimiento).format("YYYY-MM-DD");
+          // d.fecha_nacimiento = moment(d.fecha_nacimiento).format("YYYY-MM-DD");
           setData({ ...msg.data, ...d });
         } else {
           setData({ ...data, ...msg.data });
@@ -484,7 +484,7 @@ export default () => {
                   variant="outlined"
                 />
               </div>
-              <div className="col-6">
+              {/* <div className="col-6">
                 <TextField
                   label="Fecha Nacimiento"
                   id="fecha_nacimiento"
@@ -497,8 +497,8 @@ export default () => {
                   disabled
                   variant="outlined"
                 />
-              </div>
-              <div className="col-6">
+              </div> */}
+              {/* <div className="col-6">
                 <TextField
                   label="RH"
                   id="rh"
@@ -511,7 +511,7 @@ export default () => {
                   disabled
                   variant="outlined"
                 />
-              </div>
+              </div> */}
               <div className="col-6">
                 <div className="phone-group">
                   <TextField
