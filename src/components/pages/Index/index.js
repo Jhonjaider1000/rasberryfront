@@ -194,7 +194,7 @@ export default () => {
       if (!msg.temperature) {
         return;
       }
-      setTemperature(msg.temperature);
+      setTemperature(parseFloat(`${msg.temperature}`.replace("\r", "")));
     }
   };
 
